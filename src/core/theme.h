@@ -65,8 +65,8 @@ public:
 
     // Theme colors in RGB565 format
     uint16_t priColor = DEFAULT_PRICOLOR;
-    uint16_t secColor = 0x630C; // dim, readable on white
-    uint16_t bgColor = 0xFFFF; // CatHack: white screen background (orange is the case)
+    uint16_t secColor = 0xA80F; // CatHack accent #ad007b
+    uint16_t bgColor = 0xFC00; // CatHack orange #FF8200 (from CatHack web CSS)
 
     // UI Color
     void _setUiColor(uint16_t primary, uint16_t *secondary = nullptr, uint16_t *background = nullptr);

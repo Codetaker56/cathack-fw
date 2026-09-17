@@ -872,7 +872,7 @@ static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_
         tft.fillCircle(cx + 5, cy - 4, 1, c);               // feed horn
         tft.drawArc(cx + 5, cy - 4, 4, 3, 250, 30, c, bg);  // wave 1
         tft.drawArc(cx + 5, cy - 4, 7, 6, 250, 30, c, bg);  // wave 2
-    } else if (label == "Wifi") {
+    } else if (label == "WiFi") {
         tft.fillCircle(cx, cy + 6, 2, c);                   // node dot
         tft.drawArc(cx, cy + 6, 6, 4, 215, 325, c, bg);     // inner arc (filled band)
         tft.drawArc(cx, cy + 6, 10, 8, 215, 325, c, bg);    // outer arc
