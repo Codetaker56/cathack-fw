@@ -3,7 +3,7 @@
 #include "sd_functions.h"
 #include <ArduinoJson.h>
 
-#define DEFAULT_PRICOLOR 0xA80F
+#define DEFAULT_PRICOLOR 0xFC40 // CatHack orange (#FF8800)
 #define DEFAULT_SECCOLOR 0xCB76
 
 struct themeFiles {
