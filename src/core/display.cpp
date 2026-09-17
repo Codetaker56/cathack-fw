@@ -866,16 +866,16 @@ static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_
         tft.drawCircle(cx, cy, 7, c);
         tft.drawCircle(cx, cy, 8, c);
     } else if (label == "SubGhz") {
-        // satellite dish + signal waves
-        tft.drawArc(cx - 1, cy + 2, 7, 5, 210, 360, c, bg); // dish bowl
-        tft.drawLine(cx - 1, cy + 2, cx + 5, cy - 4, c);    // feed arm
-        tft.fillCircle(cx + 5, cy - 4, 1, c);               // feed horn
-        tft.drawArc(cx + 5, cy - 4, 4, 3, 250, 30, c, bg);  // wave 1
-        tft.drawArc(cx + 5, cy - 4, 7, 6, 250, 30, c, bg);  // wave 2
+        // satellite dish + signal waves (reverse-engineered coords from real firmware)
+        tft.drawArc(cx - 2, cy + 2, 7, 5, 210, 360, c, bg);
+        tft.drawArc(cx + 5, cy - 4, 4, 3, 250, 30, c, bg);
+        tft.drawArc(cx + 5, cy - 4, 7, 6, 250, 30, c, bg);
+        tft.fillTriangle(cx - 2, cy + 2, cx + 6, cy - 4, cx + 2, cy + 6, c);
+        tft.fillTriangle(cx + 5, cy - 4, cx + 8, cy - 8, cx + 10, cy - 5, c);
     } else if (label == "WiFi") {
-        tft.fillCircle(cx, cy + 6, 2, c);                   // node dot
-        tft.drawArc(cx, cy + 6, 6, 4, 215, 325, c, bg);     // inner arc (filled band)
-        tft.drawArc(cx, cy + 6, 10, 8, 215, 325, c, bg);    // outer arc
+        tft.fillCircle(cx, cy + 6, 2, c);
+        tft.drawArc(cx, cy + 6, 6, 4, 215, 325, c, bg);
+        tft.drawArc(cx, cy + 6, 10, 8, 215, 325, c, bg);
     } else if (label == "Bluetooth") {
         int t = cx, m = cy;
         tft.drawLine(t, m - 9, t, m + 9, c);
@@ -894,26 +894,26 @@ static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_
                          cx + (int)(cos(r) * 9), cy + (int)(sin(r) * 9), c);
         }
     } else if (label == "Others") {
-        tft.drawCircle(cx, cy + 1, 6, c); // cat head
+        tft.drawCircle(cx, cy + 1, 6, c);
         tft.fillTriangle(cx - 6, cy - 4, cx - 2, cy - 9, cx - 1, cy - 2, c);
         tft.fillTriangle(cx + 6, cy - 4, cx + 2, cy - 9, cx + 1, cy - 2, c);
         tft.fillCircle(cx - 2, cy, 1, c);
         tft.fillCircle(cx + 2, cy, 1, c);
     } else {
-        tft.fillCircle(cx, cy, 3, c); // generic bullet for remaining Bruce menus
+        tft.fillCircle(cx, cy, 3, c);
     }
 }
 
 void drawMainMenuCatHack(int index, std::vector<Option> &options) {
-    uint16_t bg = bruceConfig.bgColor;  // CatHack orange
-    uint16_t fg = bruceConfig.priColor; // black
+    uint16_t bg = bruceConfig.bgColor;  // CatHack orange 0xFC00
+    uint16_t fg = bruceConfig.priColor; // black 0x0000
     int n = options.size();
     if (n <= 0) return;
     tft.fillScreen(bg);
     tft.setTextSize(FM);
 
     int visible = n < 3 ? n : 3;
-    int rowH = 42;
+    int rowH = 48;                       // slot pitch from real firmware (addi a3,a3,48)
     int top = index - 1;
     if (top > n - visible) top = n - visible;
     if (top < 0) top = 0;
@@ -925,7 +925,7 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
         if (i < 0 || i >= n) continue;
         int ry = startY + slot * rowH;
         int cy = ry + rowH / 2;
-        if (i == index) { // black rounded-outline selection box (2px)
+        if (i == index) { // black rounded-outline selection box
             tft.drawRoundRect(4, ry + 3, tftWidth - 34, rowH - 8, 7, fg);
             tft.drawRoundRect(5, ry + 4, tftWidth - 36, rowH - 10, 6, fg);
         }
