@@ -913,27 +913,25 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
     tft.setTextSize(FM);
 
     int visible = n < 3 ? n : 3;
-    int rowH = 48;                       // slot pitch from real firmware (addi a3,a3,48)
+    int rowH = 48;                       // slot pitch from real firmware
     int top = index - 1;
     if (top > n - visible) top = n - visible;
     if (top < 0) top = 0;
-    int startY = (tftHeight - rowH * visible) / 2;
-    if (startY < 0) startY = 0;
+    int startY = 49;                     // top slot at Y=49, string at Y=17 (real firmware)
 
     for (int slot = 0; slot < visible; slot++) {
         int i = top + slot;
         if (i < 0 || i >= n) continue;
         int ry = startY + slot * rowH;
-        int cy = ry + rowH / 2;
-        if (i == index) { // black rounded-outline selection box
-            tft.drawRoundRect(4, ry + 3, tftWidth - 34, rowH - 8, 7, fg);
-            tft.drawRoundRect(5, ry + 4, tftWidth - 36, rowH - 10, 6, fg);
+        if (i == index) { // black rounded-outline selection box around the whole slot
+            tft.drawRoundRect(4, ry, tftWidth - 8, rowH, 4, fg);
+            tft.drawRoundRect(5, ry + 1, tftWidth - 10, rowH - 2, 3, fg);
         }
         uint16_t tc = options[i].enabled ? fg : TFT_DARKGREY;
-        drawCatIcon(options[i].label, 20, cy, tc, bg);
         tft.setTextColor(tc, bg);
-        tft.setCursor(42, cy - 8);
-        tft.print(options[i].label);
+        // real firmware: label centered, icon sits below the label inside the slot
+        tft.drawString(options[i].label, tftWidth / 2, ry - 32, 1);
+        drawCatIcon(options[i].label, tftWidth / 2, ry, tc, bg);
     }
 }
 
