@@ -866,14 +866,16 @@ static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_
         tft.drawCircle(cx, cy, 7, c);
         tft.drawCircle(cx, cy, 8, c);
     } else if (label == "SubGhz") {
-        tft.drawEllipse(cx, cy - 1, 9, 4, c);            // dish rim
-        tft.drawLine(cx - 6, cy + 1, cx + 2, cy + 9, c); // mast
-        tft.drawLine(cx + 2, cy + 9, cx + 8, cy + 9, c); // base
-        tft.fillCircle(cx + 3, cy - 4, 1, c);            // feed
-    } else if (label == "WiFi") {
-        tft.fillCircle(cx, cy + 6, 2, c);
-        tft.drawArc(cx, cy + 6, 5, 6, 215, 325, c, bg);
-        tft.drawArc(cx, cy + 6, 9, 10, 215, 325, c, bg);
+        // satellite dish + signal waves
+        tft.drawArc(cx - 1, cy + 2, 7, 5, 210, 360, c, bg); // dish bowl
+        tft.drawLine(cx - 1, cy + 2, cx + 5, cy - 4, c);    // feed arm
+        tft.fillCircle(cx + 5, cy - 4, 1, c);               // feed horn
+        tft.drawArc(cx + 5, cy - 4, 4, 3, 250, 30, c, bg);  // wave 1
+        tft.drawArc(cx + 5, cy - 4, 7, 6, 250, 30, c, bg);  // wave 2
+    } else if (label == "Wifi") {
+        tft.fillCircle(cx, cy + 6, 2, c);                   // node dot
+        tft.drawArc(cx, cy + 6, 6, 4, 215, 325, c, bg);     // inner arc (filled band)
+        tft.drawArc(cx, cy + 6, 10, 8, 215, 325, c, bg);    // outer arc
     } else if (label == "Bluetooth") {
         int t = cx, m = cy;
         tft.drawLine(t, m - 9, t, m + 9, c);
