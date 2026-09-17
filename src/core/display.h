@@ -178,6 +178,7 @@ Opt_Coord drawOptions(
 );
 
 void drawSubmenu(int index, std::vector<Option> &options, const char *title);
+void drawMainMenuCatHack(int index, std::vector<Option> &options); // CatHack-style main menu
 
 void drawStatusBar();
 void drawMainBorder(bool clear = true);

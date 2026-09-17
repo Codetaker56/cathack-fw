@@ -5,9 +5,12 @@
 
 MainMenu::MainMenu() {
     _menuItems = {
-        &wifiMenu,
-        &bleMenu,
-        &rfMenu,
+        // CatHack order: Infrared, SubGhz, WiFi, Bluetooth first (matches CatHack UI),
+        // remaining Bruce menus kept below, Others + Settings last.
+        &irMenu,   // Infrared
+        &rfMenu,   // SubGhz
+        &wifiMenu, // WiFi
+        &bleMenu,  // Bluetooth
         &nrf24Menu,
 #if !defined(LITE_VERSION)
         &loraMenu,
@@ -15,7 +18,6 @@ MainMenu::MainMenu() {
 #if defined(FM_SI4713) && !defined(LITE_VERSION)
         &fmMenu,
 #endif
-        &irMenu,
 #if !defined(LITE_VERSION)
         &ethernetMenu,
 #endif
@@ -26,8 +28,8 @@ MainMenu::MainMenu() {
         &scriptsMenu,
 #endif
         &clockMenu,
-        &othersMenu,
-        &configMenu,
+        &othersMenu, // Others
+        &configMenu, // Settings
     };
 
     _totalItems = _menuItems.size();

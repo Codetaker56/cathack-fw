@@ -3,7 +3,8 @@
 #include "sd_functions.h"
 #include <ArduinoJson.h>
 
-#define DEFAULT_PRICOLOR 0xFC40 // CatHack orange (#FF8800)
+#define DEFAULT_PRICOLOR 0x0000 // CatHack: black text/accents on orange bg
+#define CATHACK_ORANGE   0xFC40 // #FF8800
 #define DEFAULT_SECCOLOR 0xCB76
 
 struct themeFiles {
@@ -64,8 +65,8 @@ public:
 
     // Theme colors in RGB565 format
     uint16_t priColor = DEFAULT_PRICOLOR;
-    uint16_t secColor = DEFAULT_PRICOLOR - 0x2000;
-    uint16_t bgColor = 0x0000;
+    uint16_t secColor = 0x8410; // gray, readable on orange
+    uint16_t bgColor = CATHACK_ORANGE; // CatHack orange background
 
     // UI Color
     void _setUiColor(uint16_t primary, uint16_t *secondary = nullptr, uint16_t *background = nullptr);

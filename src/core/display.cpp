@@ -571,10 +571,8 @@ int loopOptions(
                 bruceConfig.setDevMode(true);
                 displayInfo("Dev Mode Enabled", true);
             }
-            if (millis() - _clock_bat_timer > 30000) {
-                _clock_bat_timer = millis();
-                drawStatusBar(); // update clock and battery status each 30s
-            }
+            // CatHack main menu has no status bar; keep the timer, skip the draw
+            if (millis() - _clock_bat_timer > 30000) { _clock_bat_timer = millis(); }
         }
 
         if (redraw) {
@@ -589,7 +587,8 @@ int loopOptions(
                 renderedByLambda = options[index].hover(options[index].hoverPointer, true);
 
             if (!renderedByLambda) {
-                if (menuType == MENU_TYPE_SUBMENU) drawSubmenu(index, options, subText);
+                if (menuType == MENU_TYPE_MAIN) drawMainMenuCatHack(index, options);
+                else if (menuType == MENU_TYPE_SUBMENU) drawSubmenu(index, options, subText);
                 else
                     coord = drawOptions(
                         index,
@@ -854,6 +853,86 @@ Opt_Coord drawOptions(
     TouchFooter();
 #endif
     return coord;
+}
+
+/***************************************************************************************
+** CatHack-style main menu: full-orange screen, black monospace text, per-row icons,
+** and a black rounded-outline box on the selected row.
+** Visual reference: github.com/Stachugit/CatHack images/res.jpg
+***************************************************************************************/
+static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_t bg) {
+    if (label == "Infrared") {
+        tft.fillCircle(cx, cy, 3, c);
+        tft.drawCircle(cx, cy, 7, c);
+        tft.drawCircle(cx, cy, 8, c);
+    } else if (label == "SubGhz") {
+        tft.drawEllipse(cx, cy - 1, 9, 4, c);            // dish rim
+        tft.drawLine(cx - 6, cy + 1, cx + 2, cy + 9, c); // mast
+        tft.drawLine(cx + 2, cy + 9, cx + 8, cy + 9, c); // base
+        tft.fillCircle(cx + 3, cy - 4, 1, c);            // feed
+    } else if (label == "WiFi") {
+        tft.fillCircle(cx, cy + 6, 2, c);
+        tft.drawArc(cx, cy + 6, 5, 6, 215, 325, c, bg);
+        tft.drawArc(cx, cy + 6, 9, 10, 215, 325, c, bg);
+    } else if (label == "Bluetooth") {
+        int t = cx, m = cy;
+        tft.drawLine(t, m - 9, t, m + 9, c);
+        tft.drawLine(t, m - 9, t + 5, m - 4, c);
+        tft.drawLine(t + 5, m - 4, t, m + 1, c);
+        tft.drawLine(t, m - 1, t + 5, m + 4, c);
+        tft.drawLine(t + 5, m + 4, t, m + 9, c);
+        tft.drawLine(t - 4, m - 4, t + 5, m + 4, c);
+        tft.drawLine(t - 4, m + 4, t + 5, m - 4, c);
+    } else if (label == "Settings") {
+        tft.drawCircle(cx, cy, 5, c);
+        tft.fillCircle(cx, cy, 2, c);
+        for (int a = 0; a < 360; a += 45) {
+            float r = a * 0.017453293f;
+            tft.drawLine(cx + (int)(cos(r) * 5), cy + (int)(sin(r) * 5),
+                         cx + (int)(cos(r) * 9), cy + (int)(sin(r) * 9), c);
+        }
+    } else if (label == "Others") {
+        tft.drawCircle(cx, cy + 1, 6, c); // cat head
+        tft.fillTriangle(cx - 6, cy - 4, cx - 2, cy - 9, cx - 1, cy - 2, c);
+        tft.fillTriangle(cx + 6, cy - 4, cx + 2, cy - 9, cx + 1, cy - 2, c);
+        tft.fillCircle(cx - 2, cy, 1, c);
+        tft.fillCircle(cx + 2, cy, 1, c);
+    } else {
+        tft.fillCircle(cx, cy, 3, c); // generic bullet for remaining Bruce menus
+    }
+}
+
+void drawMainMenuCatHack(int index, std::vector<Option> &options) {
+    uint16_t bg = bruceConfig.bgColor;  // CatHack orange
+    uint16_t fg = bruceConfig.priColor; // black
+    int n = options.size();
+    if (n <= 0) return;
+    tft.fillScreen(bg);
+    tft.setTextSize(FM);
+
+    int visible = n < 3 ? n : 3;
+    int rowH = 42;
+    int top = index - 1;
+    if (top > n - visible) top = n - visible;
+    if (top < 0) top = 0;
+    int startY = (tftHeight - rowH * visible) / 2;
+    if (startY < 0) startY = 0;
+
+    for (int slot = 0; slot < visible; slot++) {
+        int i = top + slot;
+        if (i < 0 || i >= n) continue;
+        int ry = startY + slot * rowH;
+        int cy = ry + rowH / 2;
+        if (i == index) { // black rounded-outline selection box (2px)
+            tft.drawRoundRect(4, ry + 3, tftWidth - 34, rowH - 8, 7, fg);
+            tft.drawRoundRect(5, ry + 4, tftWidth - 36, rowH - 10, 6, fg);
+        }
+        uint16_t tc = options[i].enabled ? fg : TFT_DARKGREY;
+        drawCatIcon(options[i].label, 20, cy, tc, bg);
+        tft.setTextColor(tc, bg);
+        tft.setCursor(42, cy - 8);
+        tft.print(options[i].label);
+    }
 }
 
 /***************************************************************************************
