@@ -917,7 +917,7 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
     int top = index - 1;
     if (top > n - visible) top = n - visible;
     if (top < 0) top = 0;
-    int startY = 49;                     // top slot at Y=49, string at Y=17 (real firmware)
+    int startY = 49;                     // top slot at Y=49, label at Y=17 (real firmware)
 
     for (int slot = 0; slot < visible; slot++) {
         int i = top + slot;
@@ -929,9 +929,9 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
         }
         uint16_t tc = options[i].enabled ? fg : TFT_DARKGREY;
         tft.setTextColor(tc, bg);
-        // real firmware: label centered, icon sits below the label inside the slot
-        tft.drawString(options[i].label, tftWidth / 2, ry - 32, 1);
-        drawCatIcon(options[i].label, tftWidth / 2, ry, tc, bg);
+        // real firmware: icon + label on the SAME row (left-aligned), label at y=ry-32
+        drawCatIcon(options[i].label, 20, ry - 32, tc, bg);
+        tft.drawString(options[i].label, 0, ry - 32, 17);
     }
 }
 
