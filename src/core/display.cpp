@@ -861,57 +861,51 @@ Opt_Coord drawOptions(
 ** Visual reference: github.com/Stachugit/CatHack images/res.jpg
 ***************************************************************************************/
 /***************************************************************************************
-** CatHack-style main menu — geometry extracted from real CatHack v1.4 firmware disasm:
-**   - Background = CatHack orange (0xFC00). Single thin nearly-black border around the
-**     menu area at (5,5)-(235,130) with radius 5, NOT per-row.
-**   - 3 slots, pitch 48 in firmware. For landscape 240x135 we compress pitch to 42 so
-**     all 3 rows fit (startY=4, 4/46/88).
-**   - Label/icon drawn at slot Y - 32 (so 17, 59, 101), matching disasm slot0 labelY=17.
-**   - WiFi icon = dot + 2 concentric arcs (r 5-7 and 11-13), angle 130->230 per disasm.
-**   - Selector indicator: thin rounded outline around the SELECTED slot (handoff-confirmed).
+** CatHack-style main menu — version 3:
+**   - Background = CatHack orange (0xFC00). Single thin black screen border
+**     (5,5,230,125,radius=5) per disasm at 0x401a6377.
+**   - 3 rows in landscape (240x135) using pitch=42 to fit.
+**   - GLCD font at FM=2 (matches Bruce default).
+**   - Selected row inverted: black band + orange text.
+**   - Icons: clean geometric shapes, sized to ~16px glyph cell.
 ***************************************************************************************/
 static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_t bg) {
     if (label == "Infrared") {
-        // Bullseye: dot + ring + ring (matches real CatHack IR glyph)
+        // Bullseye: dot + outer ring
         tft.fillCircle(cx, cy, 2, c);
-        tft.drawCircle(cx, cy, 6, c);
-        tft.drawCircle(cx, cy, 10, c);
+        tft.drawCircle(cx, cy, 7, c);
     } else if (label == "SubGhz") {
-        // Satellite dish (concave arc opening upper-right) + 2 outgoing waves
-        tft.drawArc(cx - 2, cy + 3, 9, 7, 200, 340, c, bg);              // dish curve
-        tft.fillTriangle(cx - 4, cy + 4, cx + 6, cy - 6, cx, cy - 1, c); // dish face fill
-        tft.drawArc(cx + 4, cy - 6, 4, 2, 240, 300, c, bg);               // inner wave
-        tft.drawArc(cx + 4, cy - 6, 8, 6, 240, 300, c, bg);               // outer wave
+        // Antenna: vertical line with two radiating arcs
+        tft.drawLine(cx, cy + 6, cx, cy - 4, c);
+        tft.drawArc(cx, cy + 2, 4, 3, 200, 340, c, bg);
+        tft.drawArc(cx, cy + 2, 8, 7, 200, 340, c, bg);
     } else if (label == "WiFi") {
-        // Disasm-confirmed: 2 concentric arcs at (cx,cy), inner r=5-7, outer r=11-13,
-        // span 130->230 degrees. Add a small filled dot at the apex (bottom of fan).
-        tft.fillCircle(cx, cy + 1, 2, c);
-        tft.drawArc(cx, cy, 5, 7, 130, 230, c, bg);
-        tft.drawArc(cx, cy, 11, 13, 130, 230, c, bg);
+        // WiFi fan: dot + 2 arcs, classic shape
+        tft.fillCircle(cx, cy + 6, 2, c);
+        tft.drawArc(cx, cy + 6, 5, 4, 210, 330, c, bg);
+        tft.drawArc(cx, cy + 6, 10, 9, 210, 330, c, bg);
     } else if (label == "Bluetooth") {
-        // Classic BT rune: vertical spine + two diamond lobes + X cross
+        // BT rune: vertical spine + diamond
         int t = cx, m = cy;
-        tft.drawLine(t, m - 9, t, m + 9, c);
-        tft.drawLine(t, m - 9, t + 5, m - 4, c);
-        tft.drawLine(t + 5, m - 4, t, m, c);
-        tft.drawLine(t, m, t + 5, m + 4, c);
-        tft.drawLine(t + 5, m + 4, t, m + 9, c);
-        tft.drawLine(t - 4, m - 4, t + 5, m + 4, c);
-        tft.drawLine(t - 4, m + 4, t + 5, m - 4, c);
+        tft.drawLine(t, m - 8, t, m + 8, c);
+        tft.drawLine(t, m - 8, t + 4, m - 4, c);
+        tft.drawLine(t + 4, m - 4, t, m, c);
+        tft.drawLine(t, m, t + 4, m + 4, c);
+        tft.drawLine(t + 4, m + 4, t, m + 8, c);
     } else if (label == "Settings") {
-        // Gear: hollow ring + radial teeth
+        // Gear: ring + radial teeth
         tft.drawCircle(cx, cy, 7, c);
         tft.fillCircle(cx, cy, 3, c);
         for (int a = 0; a < 360; a += 45) {
             float r = a * 0.017453293f;
             tft.drawLine(cx + (int)(cos(r) * 8), cy + (int)(sin(r) * 8),
-                         cx + (int)(cos(r) * 11), cy + (int)(sin(r) * 11), c);
+                         cx + (int)(cos(r) * 10), cy + (int)(sin(r) * 10), c);
         }
     } else if (label == "Others") {
-        // Cat face: filled head + 2 triangular ears + 2 eyes
+        // Cat face: filled head + ears + eyes
         tft.fillCircle(cx, cy + 2, 5, c);
-        tft.fillTriangle(cx - 5, cy - 1, cx - 2, cy - 7, cx - 1, cy - 1, c);
-        tft.fillTriangle(cx + 5, cy - 1, cx + 2, cy - 7, cx + 1, cy - 1, c);
+        tft.fillTriangle(cx - 5, cy - 2, cx - 2, cy - 7, cx - 1, cy - 1, c);
+        tft.fillTriangle(cx + 5, cy - 2, cx + 2, cy - 7, cx + 1, cy - 1, c);
         tft.fillCircle(cx - 2, cy + 1, 1, bg);
         tft.fillCircle(cx + 2, cy + 1, 1, bg);
     } else {
@@ -928,12 +922,9 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
     tft.setTextSize(FM);
     tft.setTextDatum(TL_DATUM);
 
-    // Single thin border around the menu area (disasm: 5,5,230,125,radius=5,near-black).
-    // This is the only "selector" the disasm draws; per-row boxes are NOT in the binary.
+    // Single thin screen border (disasm: drawRoundRect(5,5,230,125,5,fg)).
     tft.drawRoundRect(5, 5, 230, 125, 5, fg);
 
-    // Landscape 240x135 can't fit pitch=48 (would push last row to y=145, off-screen).
-    // We compress to pitch=42, startY=4 so slot0's label lands at y=17 (matches disasm).
     int visible = n < 3 ? n : 3;
     int rowH = 42;
     int startY = 4;
@@ -945,21 +936,17 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
         int i = top + slot;
         if (i < 0 || i >= n) continue;
         int ry = startY + slot * rowH;
-        // Per disasm: label/icon drawn at slotY - 32. For our compressed layout the slot0
-        // label lands at y=4+(42-16)/2 = 17 which matches disasm slot0 labelY exactly.
+        // Center 16px-tall glyph cell vertically inside 42px row
         int contentY = ry + (rowH - 16) / 2;
-        uint16_t tc = options[i].enabled ? fg : TFT_DARKGREY;
-        tft.setTextColor(tc, bg);
-        // Selection indicator: the screen border already wraps the menu area. To make
-        // the currently-selected row pop without contradicting the disasm (which draws
-        // no per-row box), invert it: black background + orange label.
         if (i == index) {
-            tft.fillRect(7, ry, 226, rowH, fg); // black band
-            tft.setTextColor(bg, fg);            // orange-on-black for the selected row
+            // Inverted selected row: black band + orange text
+            tft.fillRoundRect(8, ry + 1, 224, rowH - 2, 3, fg);
+            tft.setTextColor(bg, fg);
             drawCatIcon(options[i].label, 18, contentY + 8, bg, fg);
             tft.drawString(options[i].label, 36, contentY);
         } else {
-            drawCatIcon(options[i].label, 18, contentY + 8, tc, bg);
+            tft.setTextColor(fg, bg);
+            drawCatIcon(options[i].label, 18, contentY + 8, fg, bg);
             tft.drawString(options[i].label, 36, contentY);
         }
     }
