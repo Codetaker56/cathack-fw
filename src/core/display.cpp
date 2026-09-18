@@ -862,43 +862,47 @@ Opt_Coord drawOptions(
 ***************************************************************************************/
 static void drawCatIcon(const String &label, int cx, int cy, uint16_t c, uint16_t bg) {
     if (label == "Infrared") {
-        tft.fillCircle(cx, cy, 3, c);
-        tft.drawCircle(cx, cy, 7, c);
-        tft.drawCircle(cx, cy, 8, c);
+        // Bullseye: filled center + 1 outer ring (single, not double)
+        tft.fillCircle(cx, cy, 2, c);
+        tft.drawCircle(cx, cy, 6, c);
     } else if (label == "SubGhz") {
-        // satellite dish + signal waves (reverse-engineered coords from real firmware)
-        tft.drawArc(cx - 2, cy + 2, 7, 5, 210, 360, c, bg);
-        tft.drawArc(cx + 5, cy - 4, 4, 3, 250, 30, c, bg);
-        tft.drawArc(cx + 5, cy - 4, 7, 6, 250, 30, c, bg);
-        tft.fillTriangle(cx - 2, cy + 2, cx + 6, cy - 4, cx + 2, cy + 6, c);
-        tft.fillTriangle(cx + 5, cy - 4, cx + 8, cy - 8, cx + 10, cy - 5, c);
+        // Satellite dish (parabolic arc facing upper-right) + 2 signal waves
+        tft.drawArc(cx, cy + 3, 8, 6, 210, 330, c, bg);            // dish curve
+        tft.fillTriangle(cx - 4, cy + 3, cx + 4, cy - 5, cx, cy, c); // dish face
+        tft.drawLine(cx + 4, cy - 5, cx + 7, cy - 8, c);             // feed-horn tip
+        tft.drawArc(cx + 5, cy - 6, 3, 2, 245, 295, c, bg);          // inner wave
+        tft.drawArc(cx + 5, cy - 6, 6, 5, 245, 295, c, bg);          // outer wave
     } else if (label == "WiFi") {
+        // WiFi fan: dot + 2 concentric arcs above (~120° fan)
         tft.fillCircle(cx, cy + 6, 2, c);
-        tft.drawArc(cx, cy + 6, 6, 4, 215, 325, c, bg);
-        tft.drawArc(cx, cy + 6, 10, 8, 215, 325, c, bg);
+        tft.drawArc(cx, cy + 6, 6, 4, 210, 330, c, bg);    // inner arc
+        tft.drawArc(cx, cy + 6, 11, 9, 210, 330, c, bg);   // outer arc
     } else if (label == "Bluetooth") {
+        // BT rune: vertical line + 2 diamonds + 2 cross strokes
         int t = cx, m = cy;
-        tft.drawLine(t, m - 9, t, m + 9, c);
-        tft.drawLine(t, m - 9, t + 5, m - 4, c);
-        tft.drawLine(t + 5, m - 4, t, m + 1, c);
-        tft.drawLine(t, m - 1, t + 5, m + 4, c);
-        tft.drawLine(t + 5, m + 4, t, m + 9, c);
-        tft.drawLine(t - 4, m - 4, t + 5, m + 4, c);
-        tft.drawLine(t - 4, m + 4, t + 5, m - 4, c);
+        tft.drawLine(t, m - 8, t, m + 8, c);
+        tft.drawLine(t, m - 8, t + 5, m - 3, c);
+        tft.drawLine(t + 5, m - 3, t, m, c);
+        tft.drawLine(t, m, t + 5, m + 3, c);
+        tft.drawLine(t + 5, m + 3, t, m + 8, c);
+        tft.drawLine(t - 4, m - 3, t + 5, m + 3, c);
+        tft.drawLine(t - 4, m + 3, t + 5, m - 3, c);
     } else if (label == "Settings") {
-        tft.drawCircle(cx, cy, 5, c);
+        // Gear: hollow ring + radial spokes (8 teeth, every 45°)
+        tft.drawCircle(cx, cy, 6, c);
         tft.fillCircle(cx, cy, 2, c);
         for (int a = 0; a < 360; a += 45) {
             float r = a * 0.017453293f;
-            tft.drawLine(cx + (int)(cos(r) * 5), cy + (int)(sin(r) * 5),
-                         cx + (int)(cos(r) * 9), cy + (int)(sin(r) * 9), c);
+            tft.drawLine(cx + (int)(cos(r) * 7), cy + (int)(sin(r) * 7),
+                         cx + (int)(cos(r) * 10), cy + (int)(sin(r) * 10), c);
         }
     } else if (label == "Others") {
-        tft.drawCircle(cx, cy + 1, 6, c);
-        tft.fillTriangle(cx - 6, cy - 4, cx - 2, cy - 9, cx - 1, cy - 2, c);
-        tft.fillTriangle(cx + 6, cy - 4, cx + 2, cy - 9, cx + 1, cy - 2, c);
-        tft.fillCircle(cx - 2, cy, 1, c);
-        tft.fillCircle(cx + 2, cy, 1, c);
+        // Cat face: filled head + 2 pointed ears + orange eyes
+        tft.fillCircle(cx, cy + 2, 5, c);
+        tft.fillTriangle(cx - 5, cy - 2, cx - 2, cy - 7, cx - 1, cy - 1, c); // left ear
+        tft.fillTriangle(cx + 5, cy - 2, cx + 2, cy - 7, cx + 1, cy - 1, c); // right ear
+        tft.fillCircle(cx - 2, cy + 1, 1, bg);                                // left eye
+        tft.fillCircle(cx + 2, cy + 1, 1, bg);                                // right eye
     } else {
         tft.fillCircle(cx, cy, 3, c);
     }
@@ -911,27 +915,31 @@ void drawMainMenuCatHack(int index, std::vector<Option> &options) {
     if (n <= 0) return;
     tft.fillScreen(bg);
     tft.setTextSize(FM);
+    tft.setTextDatum(TL_DATUM); // top-left anchor: text top sits at y
 
+    // 3 slots fit in 135-tall landscape with startY=4, rowH=42 (last bottom at 130, margin 5)
     int visible = n < 3 ? n : 3;
-    int rowH = 48;                       // slot pitch from real firmware
+    int rowH = 42;
+    int startY = 4;
     int top = index - 1;
     if (top > n - visible) top = n - visible;
     if (top < 0) top = 0;
-    int startY = 49;                     // top slot at Y=49, label at Y=17 (real firmware)
 
     for (int slot = 0; slot < visible; slot++) {
         int i = top + slot;
         if (i < 0 || i >= n) continue;
         int ry = startY + slot * rowH;
-        if (i == index) { // black rounded-outline selection box around the whole slot
-            tft.drawRoundRect(4, ry, tftWidth - 8, rowH, 4, fg);
-            tft.drawRoundRect(5, ry + 1, tftWidth - 10, rowH - 2, 3, fg);
+        // FM=2 -> GLCD glyph cell ~16px tall; center vertically inside rowH
+        int contentY = ry + (rowH - 16) / 2;
+        if (i == index) {
+            // single thin rounded outline that wraps the row
+            tft.drawRoundRect(2, ry + 1, tftWidth - 4, rowH - 2, 4, fg);
         }
         uint16_t tc = options[i].enabled ? fg : TFT_DARKGREY;
         tft.setTextColor(tc, bg);
-        // real firmware: icon + label on the SAME row (left-aligned), label at y=ry-32
-        drawCatIcon(options[i].label, 20, ry - 32, tc, bg);
-        tft.drawString(options[i].label, 0, ry - 32, 17);
+        // icon + label on the SAME row, left-aligned (icon at cx=18, label at x=36)
+        drawCatIcon(options[i].label, 18, contentY + 8, tc, bg);
+        tft.drawString(options[i].label, 36, contentY);
     }
 }
 
